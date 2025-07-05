@@ -65,7 +65,7 @@ public class Ticket
                 if (actualTicketDateWithCommuteTime > ticketDateWithInferiorRange &&
                     actualTicketDateWithCommuteTime < ticketDateWithSuperiorRange)
                 {
-                    return (stopsToUpdate, ticket.Date);
+                    return (stopsToUpdate, ticket);
                 }
             }
             
