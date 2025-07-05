@@ -31,12 +31,10 @@ public class Ticket
             if (stopsToUpdate.Item2 == null) return;
             
             var timeFromLastSoldTicket = ticket.SoldDate - stopsToUpdate.Item2;
-            var theoreticalTimeFromLastStop = stopsToUpdate.Item1.Sum(stopToSum => stopToSum.TimeFromLastStop.Value.TotalSeconds);
+            var theoreticalTimeFromLastStop = stopsToUpdate.Item1.Skip(1).Sum(stopToSum => stopToSum.TimeFromLastStop.Value.TotalSeconds);
 
-            foreach (var stopToUpdate in stopsToUpdate.Item1)
+            foreach (var stopToUpdate in stopsToUpdate.Item1.Skip(1))
             {
-                if (stopToUpdate.RelativeStopId == 1) continue;
-            
                 var percentage = stopToUpdate.TimeFromLastStop.Value.TotalSeconds * 100 / theoreticalTimeFromLastStop;
                 var timeToAdd = timeFromLastSoldTicket.Value.TotalSeconds * percentage / 100;
                 stopToUpdate.TimeFromLastStop = TimeSpan.FromSeconds(( stopToUpdate.TimeFromLastStop.Value.TotalSeconds + timeToAdd ) / 2);
@@ -55,7 +53,7 @@ public class Ticket
         
         foreach (var stop in stops.Skip(1))
         {
-            stopsToUpdate.Add(stop);
+            stopsToUpdate.Insert(0, stop);
             if (stop.RelativeStopId == 1) continue;
 
             foreach (var ticket in stop.LastSoldTickets)
