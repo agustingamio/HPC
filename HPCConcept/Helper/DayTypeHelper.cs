@@ -14,6 +14,17 @@ public static class DayTypeHelper
             _ => throw new ArgumentOutOfRangeException(nameof(dayType), dayType, null)
         };
     }
+    
+    public static DayType GetNextDayType(this DayType dayType)
+    {
+        return dayType switch
+        {
+            DayType.WorkingDay => DayType.Saturday,
+            DayType.Saturday => DayType.Sunday,
+            DayType.Sunday => DayType.WorkingDay,
+            _ => throw new ArgumentOutOfRangeException(nameof(dayType), dayType, null)
+        };
+    }
 
     public static DayType GetDateType(this DateTime day)
     {

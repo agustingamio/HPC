@@ -1,4 +1,5 @@
 using HPCConcept.Helper;
+using System.ComponentModel.Design;
 
 namespace HPCConcept.Structures;
 
@@ -16,20 +17,23 @@ public class Ticket
                                                     stop.VariantId == ticket.VariantId && 
                                                     stop.DayType == ticket.SoldDate.GetDateType());
         
-            stop.LastSoldTicket = ticket.SoldDate;
+            stop.AddLastSoldTicket(ticket.SoldDate);
 
             if (stop.RelativeStopId == 1) return;
         
-            // Get the previous stop where a ticket was sold
-            var stopsToUpdate = GetPreviousStopWithSoldTicket(stop, graph, frequencies);
-        
-            // Update previous stops
-            // TODO: Capas en la funcion anterior ya prodria devovler una lista con todas las paradas que se van a tener que cambiar, asi seria mas facil.
+            var previousStops = StopGraph.GetPreviousStops(stop, graph);
+            var estimatedDateTimeOfDeparture = ticket.SoldDate - GetEstimatedTimeBetweenStops(previousStops);
             
-            var timeFromLastSoldTicket = ticket.SoldDate - stopsToUpdate.Last().LastSoldTicket;
-            var theoreticalTimeFromLastStop = stopsToUpdate.Sum(stopToSum => stopToSum.TimeFromLastStop.Value.TotalSeconds);
+            var range = Frequency.GetFrequencyAverage(frequencies, ticket, estimatedDateTimeOfDeparture);
 
-            foreach (var stopToUpdate in stopsToUpdate)
+            var stopsToUpdate = GetStopsToUpdate(previousStops, range, ticket);
+            
+            if (stopsToUpdate.Item2 == null) return;
+            
+            var timeFromLastSoldTicket = ticket.SoldDate - stopsToUpdate.Item2;
+            var theoreticalTimeFromLastStop = stopsToUpdate.Item1.Sum(stopToSum => stopToSum.TimeFromLastStop.Value.TotalSeconds);
+
+            foreach (var stopToUpdate in stopsToUpdate.Item1)
             {
                 if (stopToUpdate.RelativeStopId == 1) continue;
             
@@ -42,42 +46,35 @@ public class Ticket
         {
             Console.WriteLine(e);
         }
-        
     }
-
-    private static List<StopGraph> GetPreviousStopWithSoldTicket(StopGraph actualStop, List<StopGraph> graph, List<Frequency> frequencies)
+    
+    private static (List<StopGraph>, DateTime?) GetStopsToUpdate(List<StopGraph> stops, TimeSpan frequency, Ticket actualTicket)
     {
-        var result = new List<StopGraph> { actualStop };
-        var relativeStopId = actualStop.RelativeStopId;
+        var stopsToUpdate = new List<StopGraph> {stops.First()};
+        var estimatedCommuteTime = stops.First().TimeFromLastStop;
         
-        var range = frequencies.FirstOrDefault(frequency => frequency.VariantId == actualStop.VariantId && 
-                                                            frequency.DayType == actualStop.DayType && 
-                                                            frequency.TimeRange == ToTimeOnly((DateTime)actualStop.LastSoldTicket).GetTimeRange()).FrequencyAverage / 2;
-        
-        while (true)
+        foreach (var stop in stops.Skip(1))
         {
-            var previousStop = graph.FirstOrDefault(stop => stop.VariantId == actualStop.VariantId &&
-                                                            stop.RelativeStopId == relativeStopId - 1 &&
-                                                            stop.DayType == actualStop.DayType) ?? 
-                               graph.FirstOrDefault(stop => stop.VariantId == actualStop.VariantId && 
-                                                            stop.RelativeStopId == relativeStopId - 1 && 
-                                                            stop.DayType == actualStop.DayType.GetPreviousDayType());
-            
-            result.Add(previousStop);
-            
-            if (previousStop.RelativeStopId == 1) return result;
-            
-            if (previousStop.LastSoldTicket != null && 
-                actualStop.LastSoldTicket < previousStop.LastSoldTicket + range &&
-                actualStop.LastSoldTicket > previousStop.LastSoldTicket - range)
-                return result;
+            stopsToUpdate.Add(stop);
+            if (stop.RelativeStopId == 1) continue;
 
-            relativeStopId--;
+            foreach (var ticket in stop.LastSoldTickets)
+            {
+                if (actualTicket.SoldDate > ticket.Date - estimatedCommuteTime - frequency &&
+                    actualTicket.SoldDate < ticket.Date - estimatedCommuteTime + frequency)
+                {
+                    return (stopsToUpdate, ticket.Date);
+                }
+            }
+            
+            estimatedCommuteTime += stop.TimeFromLastStop;
         }
+
+        return (stopsToUpdate, null);
     }
 
-    private static TimeOnly ToTimeOnly(DateTime date)
+    private static TimeSpan GetEstimatedTimeBetweenStops(List<StopGraph> graph)
     {
-        return new TimeOnly(date.Hour, date.Minute, date.Second);
+        return graph.Aggregate(TimeSpan.Zero, (current, stop) => current + stop.TimeFromLastStop.Value);
     }
 }

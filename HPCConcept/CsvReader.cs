@@ -16,14 +16,20 @@ namespace HPCConcept
             {
                 var parts = line.Split(';');
                 if (parts.Length < 6) continue;
+                
+                var relativeStopId = int.Parse(parts[4]);
+                TimeOnly? departureTime = relativeStopId == 1 ? TimeOnly.Parse(int.Parse(parts[4]) == 1 ? 
+                    parts[5].PadLeft(4, '0').Insert(2, ":") :
+                    parts[2].PadLeft(5, '0').Substring(0, 4).Insert(2, ":")) : null;
 
                 var plannedRoute = new PlannedRouteCsvLine
                 {
                     DayType = Enum.Parse<DayType>(parts[0]),
                     VariantId = int.Parse(parts[1]),
-                    FrequencyValue = TimeOnly.Parse(parts[2].PadLeft(5, '0').Substring(0, 4).Insert(2, ":")),
+                    Frequency = TimeOnly.Parse(parts[2].PadLeft(5, '0').Substring(0, 4).Insert(2, ":")),
+                    DepartureTime = departureTime, 
                     StopId = int.Parse(parts[3]),
-                    RelativeStopId = int.Parse(parts[4]),
+                    RelativeStopId = relativeStopId,
                     Hour = TimeOnly.Parse(parts[5].PadLeft(4, '0').Insert(2, ":")),
                     LastDay = parts.Length > 6 ? parts[6][0] : 'N'
                 };
