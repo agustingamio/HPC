@@ -60,8 +60,12 @@ public class Ticket
 
             foreach (var ticket in stop.LastSoldTickets)
             {
-                if (actualTicket.SoldDate > ticket.Date - estimatedCommuteTime - frequency &&
-                    actualTicket.SoldDate < ticket.Date - estimatedCommuteTime + frequency)
+                var actualTicketDateWithCommuteTime = actualTicket.SoldDate - estimatedCommuteTime;
+                var ticketDateWithInferiorRange = ticket - frequency;
+                var ticketDateWithSuperiorRange = ticket + frequency;
+                
+                if (actualTicketDateWithCommuteTime > ticketDateWithInferiorRange &&
+                    actualTicketDateWithCommuteTime < ticketDateWithSuperiorRange)
                 {
                     return (stopsToUpdate, ticket.Date);
                 }

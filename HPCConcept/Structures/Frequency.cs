@@ -132,8 +132,7 @@ public class Frequency
     
     public static TimeSpan GetFrequencyAverage(List<Frequency> frequencies, Ticket ticket, DateTime estimatedDateTimeOfDeparture)
     {
-        var dayType = ticket.SoldDate.GetDateType();
-        if (ticket.SoldDate.Date > estimatedDateTimeOfDeparture.Date) dayType = dayType.GetPreviousDayType();
+        var dayType = estimatedDateTimeOfDeparture.Date.GetDateType();
         
         var frequency = frequencies
             .Where(f => f.VariantId == ticket.VariantId && f.DayType == dayType)
