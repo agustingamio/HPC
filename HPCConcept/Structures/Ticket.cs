@@ -59,8 +59,19 @@ public class Ticket
             foreach (var ticket in stop.LastSoldTickets)
             {
                 var actualTicketDateWithCommuteTime = actualTicket.SoldDate - estimatedCommuteTime;
-                var ticketDateWithInferiorRange = ticket - frequency;
-                var ticketDateWithSuperiorRange = ticket + frequency;
+
+                DateTime ticketDateWithInferiorRange;
+                DateTime ticketDateWithSuperiorRange;
+                if (frequency > new TimeSpan(10, 0, 0, 0))
+                {
+                    ticketDateWithInferiorRange = new DateTime(2000, 1, 1, 0, 0, 0);
+                    ticketDateWithSuperiorRange = new DateTime(2000, 1, 1, 0, 0, 0);
+                }
+                else
+                {
+                    ticketDateWithInferiorRange = ticket - frequency;
+                    ticketDateWithSuperiorRange = ticket + frequency;
+                }
                 
                 if (actualTicketDateWithCommuteTime > ticketDateWithInferiorRange &&
                     actualTicketDateWithCommuteTime < ticketDateWithSuperiorRange)
