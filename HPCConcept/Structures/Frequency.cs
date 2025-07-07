@@ -24,7 +24,6 @@ public class Frequency
             var nextDeparture = GetNextDeparture(actualDeparture, departures);
             var frequencyAverage = CalculateFrequencyAverage(previousDeparture, actualDeparture, nextDeparture);
             
-            // Para verificar que las frequencias tengan alguna coeerencia 
             if (frequencyAverage > new TimeSpan(24, 0, 0))
                 if (frequencies.Where(freq => freq.VariantId == actualDeparture.VariantId).Count() > 1)
                     frequencyAverage = new TimeSpan(0, 5, 0);
@@ -54,6 +53,17 @@ public class Frequency
         
         if (previousStop != null) return previousStop;
         
+        if (actualDeparture.DayType == DayType.WorkingDay)
+        {
+            previousStop = departures
+                .Where(departure => departure.VariantId == actualDeparture.VariantId && 
+                                    departure.DayType == actualDeparture.DayType)
+                .OrderByDescending(departure => departure.Frequency)
+                .FirstOrDefault();
+            
+            return previousStop;
+        }
+        
         previousStop = departures
             .Where(departure => departure.VariantId == actualDeparture.VariantId && 
                                 departure.DayType == actualDeparture.DayType.GetPreviousDayType())
@@ -81,6 +91,17 @@ public class Frequency
             .FirstOrDefault();
         
         if (nextStop != null) return nextStop;
+        
+        if (actualDeparture.DayType == DayType.WorkingDay)
+        {
+            nextStop = departures
+                .Where(departure => departure.VariantId == actualDeparture.VariantId && 
+                                    departure.DayType == actualDeparture.DayType)
+                .OrderBy(departure => departure.Frequency)
+                .FirstOrDefault();
+            
+            return nextStop;
+        }
         
         nextStop = departures
             .Where(departure => departure.VariantId == actualDeparture.VariantId && 
