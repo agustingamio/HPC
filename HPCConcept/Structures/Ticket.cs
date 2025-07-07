@@ -18,6 +18,8 @@ public class Ticket
                                                     stop.DayType == ticket.SoldDate.GetDateType());
         
             stop.AddLastSoldTicket(ticket.SoldDate);
+            if (!stop.LastSoldTickets.Any(t => Math.Abs((t - ticket.SoldDate).TotalMinutes) < 1))
+                stop.AddLastSoldTicket(ticket.SoldDate);
 
             if (stop.RelativeStopId == 1) return;
         
