@@ -15,7 +15,7 @@ public class StopGraph
     public void AddLastSoldTicket(DateTime ticket)
     {
         if (LastSoldTickets.Count == 10) LastSoldTickets.RemoveAt(0);
-        LastSoldTickets.Add(ticket);
+        LastSoldTickets.Insert(0, ticket);
     }
     
     public static List<StopGraph> CreateStopGraphFromCsv(string filePath)
