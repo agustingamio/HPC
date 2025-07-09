@@ -17,12 +17,12 @@ public class Ticket
                                                     stop.VariantId == ticket.VariantId && 
                                                     stop.DayType == ticket.SoldDate.GetDateType());
             
-            if (stop == null) throw new Exception($"No se encontro la parada Nro: {ticket.StopId} para la variante Nro: {ticket.VariantId} en el dia {ticket.SoldDate.GetDateType()}");
+            if (stop == null) throw new Exception();
             
             if (!stop.LastSoldTickets.Any(t => Math.Abs((t - ticket.SoldDate).TotalMinutes) < 1))
                 stop.AddLastSoldTicket(ticket.SoldDate);
 
-            if (stop.RelativeStopId == 1) return 2;
+            if (stop.RelativeStopId == 1) return 5;
         
             var previousStops = StopGraph.GetPreviousStops(stop, graph);
             var estimatedDateTimeOfDeparture = ticket.SoldDate - GetEstimatedTimeBetweenStops(previousStops);
@@ -31,7 +31,7 @@ public class Ticket
 
             var stopsToUpdate = GetStopsToUpdate(previousStops, range, ticket);
             
-            if (stopsToUpdate.Item2 == null) return 3;
+            if (stopsToUpdate.Item2 == null) return 6;
             
             var timeFromLastSoldTicket = ticket.SoldDate - stopsToUpdate.Item2;
             var theoreticalTimeFromLastStop = stopsToUpdate.Item1.Skip(1).Sum(stopToSum => stopToSum.TimeFromLastStop.Value.TotalSeconds);
@@ -56,9 +56,30 @@ public class Ticket
             return 0;
         }
         catch (Exception e)
-        { 
+        {
+            if (!graph.Exists(stop => stop.VariantId == ticket.VariantId))
+            {
+                logger.Error(e, "No se encuentra la variable Nro: {VariantId}", ticket.VariantId);
+                return 1;
+            }
+
+            if (!graph.Exists(stop => stop.VariantId == ticket.VariantId &&
+                                     stop.StopId == ticket.StopId))
+            {
+                logger.Error(e, "No se encuentra la parada Nro: {StopId} para la variante Nro: {VariantId}", ticket.StopId, ticket.VariantId);
+                return 2;
+            }
+            
+            if (!graph.Exists(stop => stop.VariantId == ticket.VariantId &&
+                                        stop.StopId == ticket.StopId &&
+                                        stop.DayType == ticket.SoldDate.GetDateType()))
+            {
+                logger.Error(e, "No se encuentra la parada Nro: {StopId} para la variante Nro: {VariantId} en el dia {DayType}", ticket.StopId, ticket.VariantId, ticket.SoldDate.GetDateType());
+                return 3;
+            }
+            
             logger.Error(e, e.Message);
-            return 1;
+            return 4;
         }
     }
     

@@ -17,7 +17,7 @@ var tickets = CsvReader.ReadTicketsCsv("C:\\FING\\HPC\\ConsoleApp\\HPCConcept\\v
 
 Log.Information("Starting to process tickets...");
 var count = 0;
-var returnTypes = new int[4] {0, 0, 0, 0};
+var returnTypes = new int[7] {0, 0, 0, 0, 0, 0, 0};
 foreach (var ticket in tickets)
 {
     count++;
@@ -27,13 +27,23 @@ foreach (var ticket in tickets)
     if (count % 1000 == 0)
     {
         Log.Information($"Processed {count} tickets so far.");
-        Log.Information($"Return types: Success: {returnTypes[(int)ReturnType.Success]}, Error: {returnTypes[(int)ReturnType.Error]}, NoPreviousStops: {returnTypes[(int)ReturnType.NoPreviousStops]}, NoPreviousStopsWithSoldTicket: {returnTypes[(int)ReturnType.NoPreviousStopsWithSoldTicket]}");
+        Log.Information("Ticket processing results: " +
+                        $"Success: {returnTypes[(int)ReturnType.Success]}, " +
+                        $"VariantNotFound: {returnTypes[(int)ReturnType.VariantNotFound]}, " +
+                        $"StopForVariantNotFound: {returnTypes[(int)ReturnType.StopForVariantNotFound]}, " +
+                        $"NoStopForVariantAndDate: {returnTypes[(int)ReturnType.NoStopForVariantAndDate]}, " +
+                        $"Error: {returnTypes[(int)ReturnType.Error]}, " +
+                        $"NoPreviousStops: {returnTypes[(int)ReturnType.NoPreviousStops]}, " +
+                        $"NoPreviousStopsWithSoldTicket: {returnTypes[(int)ReturnType.NoPreviousStopsWithSoldTicket]}");
     }
 }
 
 public enum ReturnType
 {
     Success,
+    VariantNotFound,
+    StopForVariantNotFound,
+    NoStopForVariantAndDate,
     Error,
     NoPreviousStops,
     NoPreviousStopsWithSoldTicket,
