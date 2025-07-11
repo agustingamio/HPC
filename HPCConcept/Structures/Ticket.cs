@@ -101,8 +101,8 @@ public class Ticket
                 DateTime ticketDateWithSuperiorRange;
                 if (frequency > new TimeSpan(10, 0, 0, 0))
                 {
-                    ticketDateWithInferiorRange = new DateTime(2000, 1, 1, 0, 0, 0);
-                    ticketDateWithSuperiorRange = new DateTime(2000, 1, 1, 0, 0, 0);
+                    ticketDateWithInferiorRange = DateTime.MinValue;
+                    ticketDateWithSuperiorRange = DateTime.MaxValue;
                 }
                 else
                 {
