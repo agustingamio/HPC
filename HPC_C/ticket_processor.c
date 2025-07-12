@@ -64,7 +64,7 @@ int get_stops_to_update(
     return 1;
 }
 
-void process_ticket(Ticket ticket, StopGraph* graph, int graph_count, Frequency* frequencies, int freq_count) {
+void process_ticket(const Ticket ticket, StopGraph* graph, int graph_count, Frequency* frequencies, int freq_count) {
     StopGraph* stop = NULL;
     for (int i = 0; i < graph_count; i++) {
         if (graph[i].stop_id == ticket.stop_id &&

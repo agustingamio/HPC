@@ -1,7 +1,17 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#ifndef MAX_LINE_LENGTH
+#define MAX_LINE_LENGTH 512
+#endif
+
+#ifndef LONG_MAX
+#define LONG_MAX 512
+#endif
+
 #include <time.h>
+
+int parse_datetime(const char* str, struct tm* out_tm);
 
 // Devuelve la diferencia en segundos entre dos struct tm (solo parte horaria)
 long time_diff_in_seconds(struct tm a, struct tm b);

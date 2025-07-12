@@ -3,31 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-#define MAX_LINE_LENGTH 512
-
-int parse_datetime(const char* str, struct tm* out_tm) {
-    memset(out_tm, 0, sizeof(struct tm));
-
-    int year, month, day, hour, min, sec;
-    const int parsed = sscanf(str, "%d-%d-%d %d:%d:%d",
-                        &year, &month, &day,
-                        &hour, &min, &sec);
-    if (parsed != 6) return -1;
-
-    out_tm->tm_year = year - 1900;
-    out_tm->tm_mon = month - 1;
-    out_tm->tm_mday = day;
-    out_tm->tm_hour = hour;
-    out_tm->tm_min = min;
-    out_tm->tm_sec = sec;
-    out_tm->tm_isdst = -1;
-
-    const time_t t = mktime(out_tm);
-    if (t == -1) return -1;
-
-    return 0;
-}
+#include "utils.h"
 
 int compare_tickets(const void* a, const void* b) {
     const Ticket* t1 = (const Ticket*)a;

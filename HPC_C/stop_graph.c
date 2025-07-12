@@ -1,12 +1,71 @@
 #include "stop_graph.h"
-
+#include <stdio.h>
+#include "utils.h"
+#include "planned_route.h"
 int create_stop_graph_from_csv(const char* filepath, StopGraph** graph_out, int* count_out) {
     if (!filepath || !graph_out || !count_out) {
         return -1; // Error: parámetros inválidos
     }
+    FILE* file = fopen(filepath, "r");
+    if (!file) return -1;
+    char line[MAX_LINE_LENGTH];
+    int capacity = 100, count = 0;
+    StopGraph* graph = malloc(capacity * sizeof(StopGraph));
+    if (!graph) { fclose(file); return -1; }
 
-    // TODO: implementar la lógica para leer el CSV y llenar el grafo
-    return -2; // Error: no implementado
+    PlannedRouteCsvLine** planned_routes = NULL;
+    int *planned_routes_count = 0;
+    int ok = get_planned_routes_from_csv(filepath, &planned_routes, &planned_routes_count);
+
+    fgets(line, MAX_LINE_LENGTH, file); // skip header
+    while (fgets(line, MAX_LINE_LENGTH, file)) {
+        char* parts[7];
+        int i = 0;
+        char* token = strtok(line, ";");
+        while (token && i < 7) {
+            parts[i++] = token;
+            token = strtok(NULL, ";");
+        }
+        if (i < 7) continue;
+
+        if (count >= capacity) {
+            capacity *= 2;
+            StopGraph* tmp = realloc(graph, capacity * sizeof(StopGraph));
+            if (!tmp) { free(graph); fclose(file); return -1; }
+            graph = tmp;
+        }
+
+        int variant_id = atoi(parts[1]);
+        DayType day_type = (DayType)atoi(parts[0]);
+        int stop_id = atoi(parts[3]);
+
+        int route_count = 0;
+        PlannedRouteCsvLine* route = get_route_from_planned_routes(planned_routes, planned_routes_count, variant_id, day_type, stop_id, route_count);
+
+        StopGraph sg;
+        sg.stop_id = stop_id;
+        sg.variant_id = variant_id;
+        sg.relative_stop_id = atoi(parts[4]);
+        sg.day_type = day_type;
+
+        if (sg.relative_stop_id == 1){
+            sg.time_from_last_stop = 0;
+        }else{
+            if (route) {
+                sg.time_from_last_stop = averageTimeFromLastStop(route, route_count); // Usar el tiempo de la ruta planificada
+            } else {
+                sg.time_from_last_stop = 0; // Si no hay nodo anterior, inicializar a 0
+            }
+        }
+        sg.ticket_count = 0; // Inicializar contador de tickets
+        memset(sg.last_tickets, 0, sizeof(sg.last_tickets)); // Limpiar tickets
+
+        graph[count++] = sg;
+    }
+    fclose(file);
+    *graph_out = graph;
+    *count_out = count;
+    return 0;
 }
 
 void add_ticket_to_stop(StopGraph* stop, struct tm ticket_time) {
@@ -55,4 +114,15 @@ void free_stop_graph(StopGraph* graph) {
     if (graph != NULL) {
         free(graph);
     }
+}
+
+int averageTimeFromLastStop(PlannedRouteCsvLine* route, int route_count){
+    int total_time = 0;
+    if (route && route_count > 0) {
+        for (int i = 0; i < route_count; i++) {
+            total_time += route[i].time_from_last_stop;
+        }
+        return total_time / route_count;
+    }
+    return 0;
 }

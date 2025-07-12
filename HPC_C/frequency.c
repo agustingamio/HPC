@@ -6,6 +6,7 @@
 #include "day_type.h"
 #include "planned_route.h"
 #include "ticket.h"
+#include "utils.h"
 
 PlannedRouteCsvLine* get_previous_departure(PlannedRouteCsvLine* actual_departure, PlannedRouteCsvLine* departures, const int departures_count) {
     PlannedRouteCsvLine* previous = NULL;
