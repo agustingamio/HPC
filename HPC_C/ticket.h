@@ -11,6 +11,9 @@ typedef struct {
 
 // Lee y parsea el CSV de tickets
 int read_tickets_csv(const char* filepath, Ticket** tickets_out, int* count_out);
+
+void print_ticket_line(const Ticket* ticket);
+
 // Libera la memoria de los tickets
 void free_tickets(Ticket* tickets);
 #endif

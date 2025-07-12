@@ -29,7 +29,7 @@ StopGraph* get_previous_stop(StopGraph* graph, int graph_size, StopGraph* curren
             graph[i].variant_id == current->variant_id &&
             graph[i].day_type == current->day_type) {
             return &graph[i]; // Encontrado el stop anterior
-        }
+            }
     }
 
     return NULL; // No se encontró el stop anterior
@@ -44,8 +44,8 @@ int get_previous_stops(StopGraph* graph, int graph_size, StopGraph* current, Sto
         if (graph[i].relative_stop_id < current->relative_stop_id &&
             graph[i].variant_id == current->variant_id &&
             graph[i].day_type == current->day_type) {
-            result_out[count++] = &graph[i]; 
-        }
+            result_out[count++] = &graph[i];
+            }
     }
 
     return count;
