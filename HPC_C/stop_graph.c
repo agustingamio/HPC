@@ -17,6 +17,10 @@ int create_stop_graph_from_csv(const char* filepath, StopGraph** graph_out, int*
     int *planned_routes_count = 0;
     int ok = get_planned_routes_from_csv(filepath, &planned_routes, &planned_routes_count);
 
+    if(!ok){
+        return -1;
+    }
+
     fgets(line, MAX_LINE_LENGTH, file); // skip header
     while (fgets(line, MAX_LINE_LENGTH, file)) {
         char* parts[7];
@@ -40,7 +44,7 @@ int create_stop_graph_from_csv(const char* filepath, StopGraph** graph_out, int*
         int stop_id = atoi(parts[3]);
 
         int route_count = 0;
-        PlannedRouteCsvLine* route = get_route_from_planned_routes(planned_routes, planned_routes_count, variant_id, day_type, stop_id, route_count);
+        PlannedRouteCsvLine** routes = get_route_from_planned_routes(planned_routes, planned_routes_count, variant_id, day_type, stop_id, &route_count);
 
         StopGraph sg;
         sg.stop_id = stop_id;
@@ -51,8 +55,8 @@ int create_stop_graph_from_csv(const char* filepath, StopGraph** graph_out, int*
         if (sg.relative_stop_id == 1){
             sg.time_from_last_stop = 0;
         }else{
-            if (route) {
-                sg.time_from_last_stop = averageTimeFromLastStop(route, route_count); // Usar el tiempo de la ruta planificada
+            if (routes) {
+                sg.time_from_last_stop = averageTimeFromLastStop(routes, route_count); // Usar el tiempo de la ruta planificada
             } else {
                 sg.time_from_last_stop = 0; // Si no hay nodo anterior, inicializar a 0
             }
@@ -67,6 +71,27 @@ int create_stop_graph_from_csv(const char* filepath, StopGraph** graph_out, int*
     *count_out = count;
     return 0;
 }
+
+PlannedRouteCsvLine** get_route_from_planned_routes(PlannedRouteCsvLine** planned_routes, int planned_routes_count, int variant_id,int day_type,int stop_id, int routes_count){
+    PlannedRouteCsvLine** routes_out = NULL;
+    for(int i = 0; i< planned_routes_count; i++){
+        if(planned_routes[i]->variant_id == variant_id && planned_routes[i]->day_type == day_type && planned_routes[i]->stop_id == stop_id){
+            //TODO: Mem Copy
+            routes_out[routes_count] = planned_routes[i];
+            routes_count++;
+        }
+    }
+    return routes_out;
+}
+
+long averageTimeFromLastStop(PlannedRouteCsvLine** routes, int route_count){
+    long time_sum = 0;
+    for(int i = 0; i<route_count; i++){
+        time_sum += routes[i]->time_from_last_stop;
+    }
+    return time_sum/route_count;
+}
+
 
 void add_ticket_to_stop(StopGraph* stop, struct tm ticket_time) {
     if (!stop || stop->ticket_count >= MAX_TICKETS_PER_STOP) {

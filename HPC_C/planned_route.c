@@ -82,9 +82,68 @@ int read_planned_route_csv(const char* filepath, PlannedRouteCsvLine** lines_out
     }
 
     fclose(file);
-    *lines_out = routes;
-    *count_out = count;
-    return 0;
+    int error = set_times_from_last_stop(&routes, count);
+    if (error == 0){
+        *lines_out = routes;
+        *count_out = count;
+        return 0;
+    }else{
+        return -1;
+    }
+}
+
+int set_times_from_last_stop( PlannedRouteCsvLine** routes, int* routes_count){
+    //Recorrer cada tramo
+    for(int i = 0; i<routes_count; i++){
+        if (routes[i]->relative_stop_id == 1){
+            routes[i]->time_from_last_stop = 0;
+        }else{
+            PlannedRouteCsvLine* previous_route = get_previous_route_node(routes, routes_count, routes[i]);
+            if(previous_route!= NULL)
+            routes[i]->time_from_last_stop = time_diff_in_seconds(routes[i]->hour, previous_route->hour);
+        }
+    }
+}
+
+PlannedRouteCsvLine* get_previous_route_node(PlannedRouteCsvLine** routes, int* routes_count, PlannedRouteCsvLine *route){
+    if(route->last_day == 'N'){
+        PlannedRouteCsvLine* previous_route;
+        for(int i = 0; i<routes_count; i++){
+            PlannedRouteCsvLine* current_route = routes[i]; 
+            if((current_route->variant_id = route->variant_id) && (same_time(current_route->frequency,route->frequency)) && (current_route->relative_stop_id == route->relative_stop_id-1) && (current_route->day_type == route->day_type))
+                previous_route = current_route;
+                // TODO : Mem copy para que no referencie al mismo
+                return previous_route;
+        }
+    }else{
+        for(int i = 0; i<routes_count; i++){
+            PlannedRouteCsvLine* current_route = routes[i]; 
+            PlannedRouteCsvLine** previous_routes;
+            int count_previous = 0;
+
+            if((current_route->variant_id = route->variant_id) && (same_time(current_route->frequency,route->frequency)) && (current_route->relative_stop_id == route->relative_stop_id-1)){
+                previous_routes[count_previous] = current_route;
+                count_previous ++;
+            }
+
+            for(int j = 0; j< count_previous; j++){
+                if((current_route->day_type == previous_routes[j]->day_type) && previous_routes[j]->last_day=='S'){
+                    //TODO: Mem copy para que no referencie al mismo
+                    return previous_routes[j]; 
+                }else{
+                    if((current_route->day_type == previous_routes[j]->day_type) && previous_routes[j]->last_day=='N')
+                        for(int k = 0; k< count_previous; k++){
+                            if(previous_routes[k]->day_type = get_previous_day_type(current_route->day_type)){
+                                //TODO : Mem copy
+                                return previous_routes[k];
+                            }
+                        }
+                }
+            }
+        }
+    }
+    
+    
 }
 
 int get_departures(const char* filepath, PlannedRouteCsvLine** departures, int* departures_count) {
