@@ -18,7 +18,7 @@ int parse_datetime_ticket(const char* str, struct tm* out_tm) {
     memset(out_tm, 0, sizeof(struct tm));
 
     int year, month, day, hour, min, sec;
-    const int parsed = sscanf(str, "%d-%d-%dT%d:%d:%d",
+    const int parsed = sscanf(str, "%d-%d-%d %d:%d:%d",
                         &year, &month, &day,
                         &hour, &min, &sec);
     if (parsed != 6) return -1;

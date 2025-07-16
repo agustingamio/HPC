@@ -134,10 +134,29 @@ int get_previous_stops(StopGraph* graph, int graph_size, StopGraph* current, Sto
 
     int count = 0;
     for (int i = 0; i < graph_size; i++) {
-        if (graph[i].relative_stop_id < current->relative_stop_id &&
+        if (graph[i].relative_stop_id <= current->relative_stop_id &&
             graph[i].variant_id == current->variant_id &&
             graph[i].day_type == current->day_type) {
-            result_out[count++] = &graph[i];
+            count++;
+            }
+    }
+
+    if (count == 0){
+        *result_out = NULL;
+        return 0;
+    }
+
+    *result_out = malloc(count*sizeof(StopGraph*));
+    if (*result_out == NULL){
+        return -1;
+    }
+
+    int index = 0;
+    for (int i = 0; i < graph_size; i++){
+        if (graph[i].relative_stop_id <= current->relative_stop_id &&
+            graph[i].variant_id == current->variant_id &&
+            graph[i].day_type == current->day_type){
+            (*result_out)[index++] = graph[i];
             }
     }
 

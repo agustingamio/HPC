@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.30.5)
 project(HPCCConcept C)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_BUILD_TYPE Debug)
 
 add_executable(HPCCConcept main.c planned_route.c frequency.c day_type.c ticket.c
         stop_graph.c
