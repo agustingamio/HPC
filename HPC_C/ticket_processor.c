@@ -108,7 +108,7 @@ void process_ticket(const Ticket ticket, StopGraph* graph, int graph_count, Freq
     StopGraph* stops_to_update = NULL;
     int update_count = 0;
     struct tm* last_sold_ticket_time = NULL;
-    get_stops_to_update(previous_stops, previous_stops_count, range, ticket, &stops_to_update, &update_count, last_sold_ticket_time);
+    get_stops_to_update(previous_stops, previous_stops_count, range, ticket, &stops_to_update, &update_count, &last_sold_ticket_time);
 
     if (last_sold_ticket_time == NULL) return;
 
