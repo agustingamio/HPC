@@ -107,7 +107,7 @@ void process_ticket(Ticket ticket, StopGraph* graph, int graph_count, Frequency*
     // Obtener stops a actualizar
     StopGraph* stops_to_update = NULL;
     int update_count = 0;
-    struct tm* last_sold_ticket_time = NULL;
+    struct tm * last_sold_ticket_time = malloc(sizeof(struct tm));
     get_stops_to_update(previous_stops, previous_stops_count, range, ticket, &stops_to_update, &update_count, last_sold_ticket_time);
 
     if (last_sold_ticket_time == NULL) return;
@@ -132,4 +132,5 @@ void process_ticket(Ticket ticket, StopGraph* graph, int graph_count, Frequency*
         double updated = ((double)stops_to_update[i].time_from_last_stop + time_to_add) / 2.0;
         stops_to_update[i].time_from_last_stop = (long)updated;
     }
+    free(last_sold_ticket_time);
 }
