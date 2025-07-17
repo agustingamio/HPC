@@ -38,14 +38,10 @@ public class Ticket
  
             foreach (var stopToUpdate in stopsToUpdate.Item1.Skip(1))
             {
-                double percentage;
+                double percentage = 100;;
                 if (theoreticalTimeFromLastStop != 0)
                 {
                     percentage = stopToUpdate.TimeFromLastStop.Value.TotalSeconds * 100 / theoreticalTimeFromLastStop;
-                }
-                else
-                {
-                    percentage = 100;
                 }
                 
                 var timeToAdd = timeFromLastSoldTicket.Value.TotalSeconds * percentage / 100;
