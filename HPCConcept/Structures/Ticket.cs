@@ -97,8 +97,9 @@ public class Ticket
                 DateTime ticketDateWithSuperiorRange;
                 if (frequency > new TimeSpan(10, 0, 0, 0))
                 {
-                    ticketDateWithInferiorRange = DateTime.MinValue;
-                    ticketDateWithSuperiorRange = DateTime.MaxValue;
+                    //TODO: Verificar si entra aca, no deberia
+                    ticketDateWithInferiorRange = ticket.Date.AddDays(-1);
+                    ticketDateWithSuperiorRange = ticket.Date.AddDays(1);
                 }
                 else
                 {
