@@ -163,6 +163,81 @@ int get_previous_stops(StopGraph* graph, int graph_size, StopGraph* current, Sto
     return count;
 }
 
+int save_stop_graph_to_csv(const char* filepath, const StopGraph* graph, int count) {
+    FILE* file = fopen(filepath, "w");
+    if (!file) return -1;
+
+    // Write header (optional)
+    fprintf(file, "stop_id,variant_id,day_type,relative_stop_id,time_from_last_stop,ticket_count\n");
+
+    for (int i = 0; i < count; ++i) {
+        const StopGraph* g = &graph[i];
+        fprintf(file, "%d,%d,%d,%d,%ld,%d\n",
+            g->stop_id,
+            g->variant_id,
+            (int)g->day_type,
+            g->relative_stop_id,
+            g->time_from_last_stop,
+            g->ticket_count
+        );
+    }
+
+    fclose(file);
+    return 0;
+}
+
+int load_stop_graph_from_csv(const char* filepath, StopGraph** graph_out, int* count_out) {
+    FILE* file = fopen(filepath, "r");
+    if (!file) return -1;
+
+    char line[256];
+    int capacity = 100;
+    int count = 0;
+    StopGraph* graph = malloc(capacity * sizeof(StopGraph));
+    if (!graph) {
+        fclose(file);
+        return -1;
+    }
+
+    // Skip header
+    fgets(line, sizeof(line), file);
+
+    while (fgets(line, sizeof(line), file)) {
+        if (count >= capacity) {
+            capacity *= 2;
+            StopGraph* temp = realloc(graph, capacity * sizeof(StopGraph));
+            if (!temp) {
+                free(graph);
+                fclose(file);
+                return -1;
+            }
+            graph = temp;
+        }
+
+        StopGraph* g = &graph[count];
+
+        int day_type_int;
+        sscanf(line, "%d,%d,%d,%d,%ld,%d",
+               &g->stop_id,
+               &g->variant_id,
+               &day_type_int,
+               &g->relative_stop_id,
+               &g->time_from_last_stop,
+               &g->ticket_count);
+
+        g->day_type = (DayType)day_type_int;
+
+        count++;
+    }
+
+    fclose(file);
+    *graph_out = graph;
+    *count_out = count;
+    return 0;
+}
+
+
+
 void print_stop_graph_line(const StopGraph* stop) {
     if (stop) {
         printf("Stop ID: %d, Variant ID: %d, Day Type: %d, Relative Stop ID: %d, Time from Last Stop: %ld seconds, Ticket Count: %d\n",

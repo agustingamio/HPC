@@ -6,7 +6,7 @@
 #endif
 
 #ifndef LONG_MAX
-#define LONG_MAX 512
+#define LONG_MAX 5120000
 #endif
 
 #include <time.h>

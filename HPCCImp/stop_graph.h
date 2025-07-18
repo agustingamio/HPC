@@ -28,6 +28,10 @@ StopGraph* get_previous_stop(StopGraph* graph, int graph_size, StopGraph* curren
 // Devuelve los stops anteriores en la ruta
 int get_previous_stops(StopGraph* graph, int graph_size, StopGraph* current, StopGraph** result_out);
 
+int save_stop_graph_to_csv(const char* filepath, const StopGraph* graph, int count);
+
+int load_stop_graph_from_csv(const char* filepath, StopGraph** graph_out, int* count_out);
+
 void print_stop_graph_line(const StopGraph* stop);
 
 void free_stop_graph(StopGraph* tickets);
