@@ -26,7 +26,7 @@ void add_ticket_to_stop(StopGraph* stop, struct tm ticket_time);
 StopGraph* get_previous_stop(StopGraph* graph, int graph_size, StopGraph* current);
 
 // Devuelve los stops anteriores en la ruta
-int get_previous_stops(StopGraph* graph, int graph_size, StopGraph* current, StopGraph** result_out);
+int get_previous_stops(StopGraph* graph, int graph_size, StopGraph* current, StopGraph*** result_out);
 
 int save_stop_graph_to_csv(const char* filepath, const StopGraph* graph, int count);
 
