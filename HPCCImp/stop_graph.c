@@ -127,6 +127,7 @@ StopGraph* get_previous_stop(StopGraph* graph, int graph_size, StopGraph* curren
     return NULL; // No se encontró el stop anterior
 }
 
+
 int get_previous_stops(StopGraph* graph, int graph_size, StopGraph* current, StopGraph*** result_out) {
     if (!graph || graph_size <= 0 || !current || !result_out) {
         return -1; // Error: parámetros inválidos
@@ -158,6 +159,17 @@ int get_previous_stops(StopGraph* graph, int graph_size, StopGraph* current, Sto
             graph[i].day_type == current->day_type){
             (*result_out)[index++] = &graph[i];
             }
+    }
+
+    // Sort the result by relative_stop_id descending
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = i + 1; j < count; j++) {
+            if ((*result_out)[i]->relative_stop_id < (*result_out)[j]->relative_stop_id) {
+                StopGraph* temp = (*result_out)[i];
+                (*result_out)[i] = (*result_out)[j];
+                (*result_out)[j] = temp;
+            }
+        }
     }
 
     return count;

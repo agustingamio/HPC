@@ -28,7 +28,7 @@ int main(void) {
     }
 
     Ticket* ticket = NULL;
-    if (read_tickets_csv("C:\\FING\\HPC\\ConsoleApp\\HPCConcept\\viajes_stm_042025_small.csv", &ticket, &tcount) != 0) {
+    if (read_tickets_csv("C:\\FING\\HPC\\ConsoleApp\\HPCConcept\\tickets_output.csv", &ticket, &tcount) != 0) {
         printf("Failed to read tickets CSV\n");
         return 1;
     }

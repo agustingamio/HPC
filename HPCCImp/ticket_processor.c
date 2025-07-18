@@ -124,14 +124,14 @@ void process_ticket(const Ticket ticket, StopGraph* graph, const int graph_count
 
     // Suma teórica de los tiempos entre paradas
     long theoretical_time = 0;
-    for (int i = 1; i < update_count; i++) {
+    for (int i = 0; i < update_count - 1; i++) {
         theoretical_time += stops_to_update[i]->time_from_last_stop;
     }
 
     printf("Theoretical time: %ld seconds\n", theoretical_time);
 
     // Actualizar tiempos
-    for (int i = 1; i < update_count; i++) {
+    for (int i = 0; i < update_count - 1; i++) {
         double percentage = 100.0;
         if (theoretical_time != 0) {
             percentage = (double)stops_to_update[i]->time_from_last_stop * 100.0 / theoretical_time;

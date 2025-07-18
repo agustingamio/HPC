@@ -49,14 +49,14 @@ int read_tickets_csv(const char* filepath, Ticket** tickets_out, int* count_out)
     fgets(line, MAX_LINE_LENGTH, file);  // Skip header
 
     while (fgets(line, MAX_LINE_LENGTH, file)) {
-        char* parts[17];
+        char* parts[3];
         int i = 0;
         char* token = strtok(line, ",");
-        while (token && i < 17) {
+        while (token && i < 3) {
             parts[i++] = token;
             token = strtok(NULL, ",");
         }
-        if (i < 17) continue;  // Not enough columns
+        if (i < 3) continue;  // Not enough columns
 
         if (count >= capacity) {
             capacity *= 2;
@@ -66,16 +66,16 @@ int read_tickets_csv(const char* filepath, Ticket** tickets_out, int* count_out)
         }
 
         Ticket t;
-        if (parse_datetime_ticket(parts[2], &t.sold_date) != 0) continue;
-        t.stop_id = atoi(parts[11]);
-        t.variant_id = atoi(parts[16]);
+        if (parse_datetime_ticket(parts[0], &t.sold_date) != 0) continue;
+        t.stop_id = atoi(parts[1]);
+        t.variant_id = atoi(parts[2]);
 
         tickets[count++] = t;
     }
 
     fclose(file);
 
-    qsort(tickets, count, sizeof(Ticket), compare_tickets);
+    //qsort(tickets, count, sizeof(Ticket), compare_tickets);
 
     *tickets_out = tickets;
     *count_out = count;
