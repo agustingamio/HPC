@@ -50,13 +50,13 @@ namespace HPCConcept
             while (reader.ReadLine() is { } line)
             {
                 var parts = line.Split(',');
-                if (parts.Length < 17) continue;
+                if (parts.Length < 3) continue;
 
                 var ticket = new Ticket
                 {
-                    SoldDate = DateTime.Parse(parts[2]),
-                    StopId = int.Parse(parts[11]),
-                    VariantId = int.Parse(parts[16])
+                    SoldDate = DateTime.Parse(parts[0]),
+                    StopId = int.Parse(parts[1]),
+                    VariantId = int.Parse(parts[2])
                 };
 
                 tickets.Add(ticket);

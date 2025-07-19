@@ -6,8 +6,6 @@
 
 #include "utils.h"
 
-#define MAX_LINE_LENGTH 256
-
 static void parse_time(const char* src, struct tm* t) {
     if (strlen(src) > 5) {
         fprintf(stderr, "Error: Invalid time format '%s'\n", src);
@@ -132,7 +130,10 @@ int get_planned_routes_from_csv(const char* filepath, PlannedRouteCsvLine** outp
     int group_capacity = 100;
     groups = malloc(group_capacity * sizeof(RouteGroup));
 
-    if (!groups) return -1;
+    if (!groups) {
+        free(all_routes); // Free previously allocated memory
+        return -1;
+    }
 
     for (int i = 0; i < total_routes; ++i) {
         PlannedRouteCsvLine* route = &all_routes[i];
@@ -163,6 +164,12 @@ int get_planned_routes_from_csv(const char* filepath, PlannedRouteCsvLine** outp
                 group_capacity *= 2;
                 RouteGroup* tmp = realloc(groups, group_capacity * sizeof(RouteGroup));
                 if (!tmp) {
+                    // Free allocated memory before returning
+                    for (int k = 0; k < group_count; ++k) {
+                        free(groups[k].routes);
+                    }
+                    free(groups);
+                    free(all_routes);
                     return -1;
                 }
                 groups = tmp;
@@ -170,6 +177,15 @@ int get_planned_routes_from_csv(const char* filepath, PlannedRouteCsvLine** outp
 
             groups[group_count].key = key;
             groups[group_count].routes = malloc(100 * sizeof(PlannedRouteCsvLine*));
+            if (!groups[group_count].routes) {
+                // Free allocated memory before returning
+                for (int k = 0; k < group_count; ++k) {
+                    free(groups[k].routes);
+                }
+                free(groups);
+                free(all_routes);
+                return -1;
+            }
             groups[group_count].count = 0;
             groups[group_count].capacity = 100;
             idx = group_count++;
@@ -179,7 +195,17 @@ int get_planned_routes_from_csv(const char* filepath, PlannedRouteCsvLine** outp
         RouteGroup* group = &groups[idx];
         if (group->count >= group->capacity) {
             group->capacity *= 2;
-            group->routes = realloc(group->routes, group->capacity * sizeof(PlannedRouteCsvLine*));
+            PlannedRouteCsvLine** tmp = realloc(group->routes, group->capacity * sizeof(PlannedRouteCsvLine*));
+            if (!tmp) {
+                // Free allocated memory before returning
+                for (int k = 0; k < group_count; ++k) {
+                    free(groups[k].routes);
+                }
+                free(groups);
+                free(all_routes);
+                return -1;
+            }
+            group->routes = tmp;
         }
         group->routes[group->count++] = route;
     }
@@ -256,6 +282,12 @@ int get_planned_routes_from_csv(const char* filepath, PlannedRouteCsvLine** outp
             }
         }
     }
+
+    // Free memory for groups and their routes
+    for (int i = 0; i < group_count; ++i) {
+        free(groups[i].routes);
+    }
+    free(groups);
 
     *output = all_routes;
     *count_out = total_routes;
