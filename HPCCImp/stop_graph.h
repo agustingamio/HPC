@@ -28,6 +28,9 @@ StopGraph* get_previous_stop(StopGraph* graph, int graph_size, StopGraph* curren
 // Devuelve los stops anteriores en la ruta
 int get_previous_stops(StopGraph* graph, int graph_size, StopGraph* current, StopGraph** result_out);
 
+// Obtiene el stop relativo por ID de parada y variante
+int get_relative_stop_by_stop_id(StopGraph** graph, int graph_size, int stop_id, int variant_id);
+
 void print_stop_graph_line(const StopGraph* stop);
 
 void free_stop_graph(StopGraph* tickets);

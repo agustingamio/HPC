@@ -163,6 +163,20 @@ int get_previous_stops(StopGraph* graph, int graph_size, StopGraph* current, Sto
     return count;
 }
 
+int get_relative_stop_by_stop_id(StopGraph** graph, int graph_size, int stop_id, int variant_id) {
+    if (!graph || graph_size <= 0) {
+        return -1;
+    }
+
+    for (int i = 0; i < graph_size; i++) {
+        if (graph[i]->stop_id == stop_id && graph[i]->variant_id == variant_id) {
+            return graph[i]->relative_stop_id;
+        }
+    }
+
+    return -1;
+}
+
 void print_stop_graph_line(const StopGraph* stop) {
     if (stop) {
         printf("Stop ID: %d, Variant ID: %d, Day Type: %d, Relative Stop ID: %d, Time from Last Stop: %ld seconds, Ticket Count: %d\n",
