@@ -10,6 +10,7 @@
 #endif
 
 #include <time.h>
+#include <stdio.h>
 
 int parse_datetime(const char* str, struct tm* out_tm);
 
