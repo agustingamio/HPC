@@ -24,8 +24,6 @@ int get_stops_to_update(
         StopGraph* stop = stops[i];
         (*stops_to_update_out)[(*stops_to_update_count)++] = stop;
 
-        if (stop->relative_stop_id == 1) continue;
-
         for (int j = 0; j < stop->ticket_count; j++) {
             struct tm ticket_tm = stop->last_tickets[j];
 

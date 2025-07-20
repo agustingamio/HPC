@@ -111,7 +111,6 @@ public class Ticket
         foreach (var stop in stops.Skip(1))
         {
             stopsToUpdate.Insert(0, stop);
-            if (stop.RelativeStopId == 1) continue;
 
             foreach (var ticket in stop.LastSoldTickets)
             {
