@@ -14,10 +14,18 @@ typedef struct array_node_struct {
     variant_list variants;
 } array_node;
 
+enum tag_types {
+    ticket_to_process = 0,
+    send_updates = 1,
+    shutdown_signal = 2
+};
+
 array_node* create_slaves_array(const int slaves_count);
 void add_variant_to_array(array_node* slaves_array, const int variant_id, const int rank);
 int find_slave(const array_node* slaves_array, const int variant_id, const int slaves_count);
 int find_less_overloaded_slave(const array_node* slaves_array, const int slaves_count);
+void mpi_print(char* message);
 void free_list(variant_list list);
+void free_slaves_array(array_node* slaves_array, const int slaves_count);
 
 #endif

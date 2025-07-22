@@ -7,6 +7,7 @@
 #include "stop_graph.h"
 #include "ticket.h"
 #include "master_node/master.h"
+#include "slave_node/slave.h"
 
 int master() {
     // INIT MPI and send the structures
@@ -21,41 +22,13 @@ int master() {
     create_stop_graph_type(&types.stop_graph_type, types.tm_type);
     create_frequency_type(&types.frequency_type, types.tm_type);
 
-    int freq_count = 0;
-    int stops_count = 0;
-
-    Frequency* frequencies = NULL;
-    StopGraph* graph = NULL;
-
-    if (rank == 0) {
-        // Load frequencies
-        if (calculate_frequency_from_csv("C:\\FING\\HPC\\ConsoleApp\\HPCConcept\\uptu_pasada_variante.csv", &frequencies, &freq_count) != 0) {
-            printf("Failed to read CSV\n");
-            return 1;
-        }
-
-        // Load graph
-        if (load_stop_graph_from_csv("C:\\FING\\HPC\\ConsoleApp\\HPCConcept\\uptu_pasada_variante_guardado.csv", &graph, &stops_count) != 0) {
-            // Fall back to expensive calculation
-            if (create_stop_graph_from_csv("C:\\FING\\HPC\\ConsoleApp\\HPCConcept\\uptu_pasada_variante.csv", &graph, &stops_count) != 0) {
-                printf("Error loading stop graph\n");
-                return 1;
-            }
-
-            // Save result for future runs
-            save_stop_graph_to_csv("C:\\FING\\HPC\\ConsoleApp\\HPCConcept\\uptu_pasada_variante_guardado.csv", graph, stops_count);
-        }
-    }
-
-    MPI_Bcast(frequencies, freq_count, types.frequency_type, 0, MPI_COMM_WORLD);
-    MPI_Bcast(graph, stops_count, types.stop_graph_type, 0, MPI_COMM_WORLD);
-
 
     if (rank == 0) {
         // MASTER LOGIC
         main_master(types);
     } else if (rank < comm_size) {
         // SLAVE LOGIC
+        main_slave(types);
     } else {
         // STATISTIC LOGIC
     }

@@ -4,8 +4,11 @@
 
 #include "mpi_utils.h"
 
+#include <mpi.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 array_node* create_slaves_array(const int slaves_count) {;
     array_node* array = malloc(sizeof(array_node) * slaves_count);
@@ -66,6 +69,18 @@ int find_less_overloaded_slave(const array_node* slaves_array, const int slaves_
     return min_index;
 }
 
+void mpi_print(char* message) {
+    int rank;
+    const time_t now = time(NULL);
+    const struct tm* local_time = localtime(&now);
+    char time_str[20];
+
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", local_time);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    printf("DATETIME: [%s] | RANK: %d | MESSAGE: %s\n", time_str, rank, message);
+}
+
 void free_list(variant_list list) {
     variant_list current = list;
     variant_list next_node;
@@ -75,4 +90,12 @@ void free_list(variant_list list) {
         free(current);
         current = next_node;
     }
+}
+
+void free_slaves_array(array_node* slaves_array, const int slaves_count) {
+    for (int i = 0; i < slaves_count; i++) {
+        free_list(slaves_array[i].variants);
+    }
+
+    free(slaves_array);
 }
