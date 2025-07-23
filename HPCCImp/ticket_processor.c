@@ -24,8 +24,6 @@ int get_stops_to_update(
         StopGraph* stop = stops[i];
         (*stops_to_update_out)[(*stops_to_update_count)++] = stop;
 
-        if (stop->relative_stop_id == 1) continue;
-
         for (int j = 0; j < stop->ticket_count; j++) {
             struct tm ticket_tm = stop->last_tickets[j];
 
@@ -81,16 +79,12 @@ void process_ticket(const Ticket ticket, StopGraph* graph, const int graph_count
     }
     if (!already_added) {
         add_ticket_to_stop(stop, ticket.sold_date);
-        printf("Ticket added to stop\n");
-    } else {
-        printf("Ticket NOT added to stop\n");
     }
 
     if (stop->relative_stop_id == 1) return;
 
     StopGraph** previous_stops = NULL;
     int previous_stops_count = get_previous_stops(graph, graph_count, stop, &previous_stops);
-    printf("Previous stops count: %d\n", previous_stops_count);
 
     // Calcular hora estimada de partida restando los tiempos acumulados
     time_t estimated_departure = mktime(&ticket.sold_date);
@@ -98,37 +92,25 @@ void process_ticket(const Ticket ticket, StopGraph* graph, const int graph_count
         estimated_departure -= previous_stops[i]->time_from_last_stop;
     }
     const struct tm* estimated_tm = localtime(&estimated_departure);
-    printf("Estimated departure time: %02d:%02d:%02d\n",
-           estimated_tm->tm_hour, estimated_tm->tm_min, estimated_tm->tm_sec);
 
     long range = get_frequency_average(frequencies, freq_count, ticket, *estimated_tm);
-    printf("Frequency range: %ld seconds\n", range);
 
     // Obtener stops a actualizar
     StopGraph** stops_to_update = NULL;
     int update_count = 0;
     struct tm last_sold_ticket_time;
     int found_ticket = get_stops_to_update(previous_stops, previous_stops_count, range, ticket, &stops_to_update, &update_count, &last_sold_ticket_time);
-    printf("Stops to update count: %d\n", update_count);
-    if (found_ticket == 0) {
-        printf("Ticket found for update\n");
-    } else {
-        printf("No matching ticket found\n");
-    }
 
     if (found_ticket == 1) return;
 
     // Tiempo desde el último ticket vendido
     double time_from_last_sold_ticket = difftime(mktime(&ticket.sold_date), mktime(&last_sold_ticket_time));
-    printf("Time from last sold ticket: %.2f seconds\n", time_from_last_sold_ticket);
 
     // Suma teórica de los tiempos entre paradas
     long theoretical_time = 0;
     for (int i = 0; i < update_count - 1; i++) {
         theoretical_time += stops_to_update[i]->time_from_last_stop;
     }
-
-    printf("Theoretical time: %ld seconds\n", theoretical_time);
 
     // Actualizar tiempos
     for (int i = 0; i < update_count - 1; i++) {
@@ -140,6 +122,5 @@ void process_ticket(const Ticket ticket, StopGraph* graph, const int graph_count
         if (isnan(time_to_add)) time_to_add = 0;
         double updated = ((double)stops_to_update[i]->time_from_last_stop + time_to_add) / 2.0;
         stops_to_update[i]->time_from_last_stop = (long)updated;
-        printf("Updated time for stop %d: %ld seconds\n", stops_to_update[i]->stop_id, stops_to_update[i]->time_from_last_stop);
     }
 }
