@@ -250,14 +250,14 @@ int load_stop_graph_from_csv(const char* filepath, StopGraph** graph_out, int* c
 
 
 
-int get_relative_stop_by_stop_id(StopGraph** graph, int graph_size, int stop_id, int variant_id) {
+int get_relative_stop_by_stop_id(StopGraph* graph, int graph_size, int stop_id, int variant_id) {
     if (!graph || graph_size <= 0) {
         return -1;
     }
 
     for (int i = 0; i < graph_size; i++) {
-        if (graph[i]->stop_id == stop_id && graph[i]->variant_id == variant_id) {
-            return graph[i]->relative_stop_id;
+        if (graph[i].stop_id == stop_id && graph[i].variant_id == variant_id) {
+            return graph[i].relative_stop_id;
         }
     }
 

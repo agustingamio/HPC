@@ -9,4 +9,6 @@ add_executable(HPCCConcept main.c planned_route.c frequency.c day_type.c ticket.
         ticket_processor.c
         ticket_processor.h
         utils.c
-        utils.h)
+        utils.h
+        predict_time.c
+        predict_time.h)

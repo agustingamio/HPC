@@ -33,7 +33,7 @@ int save_stop_graph_to_csv(const char* filepath, const StopGraph* graph, int cou
 int load_stop_graph_from_csv(const char* filepath, StopGraph** graph_out, int* count_out);
 
 // Obtiene el stop relativo por ID de parada y variante
-int get_relative_stop_by_stop_id(StopGraph** graph, int graph_size, int stop_id, int variant_id);
+int get_relative_stop_by_stop_id(StopGraph* graph, int graph_size, int stop_id, int variant_id);
 
 void print_stop_graph_line(const StopGraph* stop);
 
