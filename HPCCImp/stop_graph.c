@@ -91,6 +91,7 @@ int create_stop_graph_from_csv(const char* file_path, StopGraph** out_graph, int
         graph[i].time_from_last_stop = (long)(groups[i].total_time / groups[i].count);
         graph[i].ticket_count = 0;
         memset(graph[i].last_tickets, 0, sizeof(graph[i].last_tickets));
+        graph[i].next_arrival_time = (struct tm){0};
     }
 
     *out_graph = graph;

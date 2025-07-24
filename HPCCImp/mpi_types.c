@@ -28,18 +28,20 @@ void create_frequency_type(MPI_Datatype *mpi_frequency_type) {
 }
 
 void create_stop_graph_type(MPI_Datatype *mpi_stop_graph_type) {
-    const int n_items = 7;
-    int block_lengths[7] = {
+    const int n_items = 8;
+    int block_lengths[8] = {
         1, 1, 1, 1, 1,
         MAX_TICKETS_PER_STOP * (int)sizeof(struct tm),
-        1
+        1,
+        (int)sizeof(struct tm)
     };
 
-    MPI_Datatype types[7] = {
+    MPI_Datatype types[8] = {
         MPI_INT, MPI_INT, MPI_INT, MPI_INT,
         MPI_LONG,
         MPI_BYTE,
-        MPI_INT
+        MPI_INT,
+        MPI_BYTE
     };
 
     StopGraph temp;
@@ -52,6 +54,7 @@ void create_stop_graph_type(MPI_Datatype *mpi_stop_graph_type) {
     MPI_Get_address(&temp.time_from_last_stop, &offsets[4]);
     MPI_Get_address(&temp.last_tickets, &offsets[5]);
     MPI_Get_address(&temp.ticket_count, &offsets[6]);
+    MPI_Get_address(&temp.next_arrival_time, &offsets[7]);
 
     for (int i = 0; i < n_items; i++)
         offsets[i] -= base;

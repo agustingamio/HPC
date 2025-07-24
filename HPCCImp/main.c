@@ -1,13 +1,10 @@
 #include <mpi.h>
-#include <stdio.h>
 #include <stdlib.h>
 
-#include "frequency.h"
 #include "mpi_types.h"
-#include "stop_graph.h"
-#include "ticket.h"
 #include "master_node/master.h"
 #include "slave_node/slave.h"
+#include "predict_time.h"
 
 int main() {
     // INIT MPI and send the structures
@@ -28,11 +25,12 @@ int main() {
     if (rank == 0) {
         // MASTER LOGIC
         main_master(types);
-    } else if (rank <= comm_size) {
+    } else if (rank < comm_size - 1) {
         // SLAVE LOGIC
         main_slave(types);
     } else {
         // STATISTIC LOGIC
+        main_predictor(types);
     }
 
     // Clean up types

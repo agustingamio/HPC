@@ -14,6 +14,7 @@ typedef struct {
     long time_from_last_stop; // segundos
     struct tm last_tickets[MAX_TICKETS_PER_STOP];
     int ticket_count;
+    struct tm next_arrival_time;
 } StopGraph;
 
 // Crea la estructura de gráfo a partir de CSV

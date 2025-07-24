@@ -48,7 +48,7 @@ void initialize_parameters(Frequency** frequencies, int* freq_count,
         printf("Failed to tickets CSV\n");
     }
 
-    *slaves_array = create_slaves_array(*comm_size);
+    *slaves_array = create_slaves_array(*comm_size - 2);
 }
 
 void send_structures(Frequency* frequencies, const int freq_count,
@@ -63,8 +63,9 @@ void send_structures(Frequency* frequencies, const int freq_count,
 
 void process_tickets(const Ticket* tickets, const int tickets_count, array_node* slaves_array, const int comm_size, const MPITypes types) {
     for (int i = 0; i < tickets_count; i++) {
-        const int slave = get_slave_for_variantId(slaves_array, tickets[i].variant_id, comm_size);
+        const int slave = get_slave_for_variantId(slaves_array, tickets[i].variant_id, comm_size - 2);
         MPI_Send(&tickets[i], 1, types.ticket_type, slave + 1, 0, MPI_COMM_WORLD);
+        MPI_Send(&tickets[i], 1, types.ticket_type, comm_size - 1, ticket_to_process, MPI_COMM_WORLD);
 
         _sleep(1);
     }
