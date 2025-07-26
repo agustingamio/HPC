@@ -66,7 +66,6 @@ void process_ticket(const Ticket ticket, StopGraph* graph, const int graph_count
 
 
     if (stop == NULL) return;
-    print_stop_graph_line(stop);
 
     // Comprobar si el ticket ya fue agregado recientemente
     int already_added = 0;

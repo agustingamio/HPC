@@ -11,25 +11,6 @@
 #include "../ticket.h"
 #include "../ticket_processor.h"
 
-void receive_structures(Frequency** frequencies, int* freq_count,
-                        StopGraph** graph, int* stops_count,
-                        const MPITypes types)
-{
-    MPI_Bcast(freq_count, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    *frequencies = (Frequency*)malloc(*freq_count * sizeof(Frequency));
-    MPI_Bcast(*frequencies, *freq_count, types.frequency_type, 0, MPI_COMM_WORLD);
-
-    MPI_Bcast(stops_count, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    *graph = (StopGraph*)malloc(*stops_count * sizeof(StopGraph));
-    MPI_Bcast(*graph, *stops_count, types.stop_graph_type, 0, MPI_COMM_WORLD);
-}
-
-void send_graph_updates(StopGraph* graph, const int stops_count,
-                        const MPITypes types)
-{
-    // WAITING FOR PREDICTOR IMPLEMENTATION
-}
-
 void message_process(const Frequency* frequencies, const int freq_count,
                      StopGraph* graph, const int stops_count,
                      const MPITypes types)
@@ -44,7 +25,9 @@ void message_process(const Frequency* frequencies, const int freq_count,
         if (tag == ticket_to_process) {
             process_ticket(ticket, graph, stops_count, frequencies, freq_count);
         } else if (tag == send_updates) {
-            send_graph_updates(graph, stops_count, types);
+            send_graph_updates(graph, stops_count, ticket, types);
+        } else if (tag == recv_updates) {
+            recv_graph_updates(graph, stops_count, ticket, types);
         } else if (tag == shutdown_signal) {
             break;
         }

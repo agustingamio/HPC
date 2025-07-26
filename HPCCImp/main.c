@@ -6,7 +6,7 @@
 #include "slave_node/slave.h"
 #include "predict_time.h"
 
-int main() {
+int main(int argc, char** argv) {
     // INIT MPI and send the structures
     int rank, comm_size;
     MPI_Init(NULL, NULL);
@@ -24,7 +24,7 @@ int main() {
 
     if (rank == 0) {
         // MASTER LOGIC
-        main_master(types);
+        main_master(types, argv[1] ? atoi(argv[1]) : 1);
     } else if (rank < comm_size - 1) {
         // SLAVE LOGIC
         main_slave(types);

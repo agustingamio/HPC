@@ -9,36 +9,12 @@
 #include "mpi_types.h"
 #include "mpi_utils.h"
 
-int get_ticket(Ticket* ticket){
-    //TODO: Ver como vamos a resolver la obtencion del ticket, de momento, datos de prueba:
-    ticket->sold_date.tm_year = 125;
-    ticket->sold_date.tm_mon = 9; // Octubre
-    ticket->sold_date.tm_mday = 15; // 15 de Octubre
-    ticket->sold_date.tm_hour = 7; // 7 AM
-    ticket->sold_date.tm_min = 27; // 27 minutos
-    ticket->sold_date.tm_sec = 10; // 10 segundos
-    ticket->sold_date.tm_isdst = -1; // No se sabe si es horario de verano
-    ticket->stop_id = 1059; // ID de la parada
-    ticket->variant_id = 650; // ID de la variante
-    return 1; // Retorna 1 si se obtuvo un ticket, 0 si no
-}
-
-int get_slave_by_variant(int variant_id) {
-    //TODO: Implementar la logica para obtener el id del nodo esclavo que tiene la variante
-    return 0;
-}
-
-StopGraph* get_stop_graph_from_slave(int slave_id, int* stop_graph_count) {
-    
-    *stop_graph_count = 0; // Asignar el conteo de paradas
-    return NULL; // Retornar el grafo de paradas
-}
-
 void calculate_estimated_time(StopGraph stop_graph, struct tm* estimated_time) {
     long time_from_last_stop = stop_graph.time_from_last_stop;
     *estimated_time = add_seconds(*estimated_time, time_from_last_stop);
 }
 
+// TODO: Refactor this function
 int predict_future_times(const Ticket ticket, int stop_graph_count, StopGraph* graph){
     //Lee la variante, tipo de dia y parada del ticket
     struct tm sold_date = ticket.sold_date;
@@ -70,16 +46,13 @@ int predict_future_times(const Ticket ticket, int stop_graph_count, StopGraph* g
     for (int i = 0; i < next_stops_count; i++) {
         calculate_estimated_time(*next_stops[i], &estimated_time);
         next_stops[i]->next_arrival_time = estimated_time;
-        printf("Estimated time for stop %d: %02d:%02d:%02d\n", next_stops[i]->relative_stop_id,
-            estimated_time.tm_hour, estimated_time.tm_min, estimated_time.tm_sec);
-        fflush(stdout);
     }
 
     return 0;
 }
 
 void message_process_predictor(StopGraph* graph, const int stops_count,
-                     const MPITypes types)
+                                const MPITypes types)
 {
     while (1) {
         Ticket ticket;
@@ -91,33 +64,21 @@ void message_process_predictor(StopGraph* graph, const int stops_count,
         if (tag == ticket_to_process) {
             predict_future_times(ticket, stops_count, graph);
         } else if (tag == send_updates) {
-            // Prepare to receive updates
+            send_graph_updates(graph, stops_count, ticket, types);
+        } else if (tag == recv_updates) {
+            recv_graph_updates(graph, stops_count, ticket, types);
         } else if (tag == shutdown_signal) {
             break;
         }
     }
 }
 
-void receive_structures_predictor(Frequency** frequencies, int* freq_count,
-                                  StopGraph** graph, int* stops_count,
-                                  const MPITypes types)
-{
-    MPI_Bcast(freq_count, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    *frequencies = (Frequency*)malloc(*freq_count * sizeof(Frequency));
-    MPI_Bcast(*frequencies, *freq_count, types.frequency_type, 0, MPI_COMM_WORLD);
-
-    MPI_Bcast(stops_count, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    *graph = (StopGraph*)malloc(*stops_count * sizeof(StopGraph));
-    MPI_Bcast(*graph, *stops_count, types.stop_graph_type, 0, MPI_COMM_WORLD);
-}
-
-
 void main_predictor(const MPITypes types) {
     int freq_count = 0, stops_count = 0;
     Frequency* frequencies = NULL;
     StopGraph* graph = NULL;
 
-    receive_structures_predictor(&frequencies, &freq_count, &graph, &stops_count, types);
+    receive_structures(&frequencies, &freq_count, &graph, &stops_count, types);
     message_process_predictor(graph, stops_count, types);
 
     free_stop_graph(graph);
