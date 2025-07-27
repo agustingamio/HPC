@@ -12,10 +12,10 @@
 
 #include "frequency.h"
 
-array_node* create_slaves_array(const int slaves_count) {;
-    array_node* array = malloc(sizeof(array_node) * slaves_count);
+array_node* create_nodes_array(const int nodes_count) {;
+    array_node* array = malloc(sizeof(array_node) * nodes_count);
 
-    for (int i = 0; i < slaves_count; i++) {
+    for (int i = 0; i < nodes_count; i++) {
         array[i].variants_count = 0;
         array[i].variants = NULL;
     }
@@ -53,9 +53,9 @@ int find_in_variant_list(variant_list list, const int variant_id) {
     return 0;
 }
 
-int find_slave(const array_node* slaves_array, const int variant_id, const int slaves_count, int* update) {
-    for (int index = 0; index < slaves_count; index++) {
-        *update = find_in_variant_list(slaves_array[index].variants, variant_id);
+int find_node(const array_node* nodes_array, const int variant_id, const int nodes_count, int* update) {
+    for (int index = 0; index < nodes_count; index++) {
+        *update = find_in_variant_list(nodes_array[index].variants, variant_id);
         if (*update) {
             return index;
         }
@@ -64,13 +64,13 @@ int find_slave(const array_node* slaves_array, const int variant_id, const int s
     return -1;
 }
 
-int find_less_overloaded_slave(const array_node* slaves_array, const int slaves_count) {
-    int min_variants = slaves_array[0].variants_count;
+int find_less_overloaded_node(const array_node* nodes_array, const int nodes_count) {
+    int min_variants = nodes_array[0].variants_count;
     int min_index = 0;
 
-    for (int i = 1; i < slaves_count; i++) {
-        if (slaves_array[i].variants_count < min_variants) {
-            min_variants = slaves_array[i].variants_count;
+    for (int i = 1; i < nodes_count; i++) {
+        if (nodes_array[i].variants_count < min_variants) {
+            min_variants = nodes_array[i].variants_count;
             min_index = i;
         }
     }

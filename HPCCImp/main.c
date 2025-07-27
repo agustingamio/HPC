@@ -7,6 +7,7 @@
 #include "predict_time.h"
 
 int main(int argc, char** argv) {
+    // TODO: Manage all MPI status
     // INIT MPI and send the structures
     int rank, comm_size;
     MPI_Init(NULL, NULL);
@@ -22,10 +23,12 @@ int main(int argc, char** argv) {
     create_stop_graph_type(&types.stop_graph_type);
     create_frequency_type(&types.frequency_type);
 
+    const int statistical_nodes_amount = argv[1] ? atoi(argv[1]) : 1;
+
     if (rank == 0) {
         // MASTER LOGIC
-        main_master(types, argv[1] ? atoi(argv[1]) : 1);
-    } else if (rank < comm_size - 1) {
+        main_master(types, statistical_nodes_amount);
+    } else if (rank < comm_size - statistical_nodes_amount) {
         // SLAVE LOGIC
         main_slave(types);
     } else {

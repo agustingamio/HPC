@@ -8,16 +8,16 @@
 #include "../frequency.h"
 #include "../stop_graph.h"
 
-int get_slave_for_variantId(array_node* slaves_array, const int variant_id, const int slaves_count, int* update){
-    const int slave = find_slave(slaves_array, variant_id, slaves_count, update);
+int get_node_for_variantId(array_node* nodes_array, const int variant_id, const int nodes_count, int* update){
+    const int node = find_node(nodes_array, variant_id, nodes_count, update);
 
-    if (slave == -1) {
-        const int less_overloaded_slave = find_less_overloaded_slave(slaves_array, slaves_count);
-        add_variant_to_array(slaves_array, variant_id, less_overloaded_slave);
-        return less_overloaded_slave;
+    if (node == -1) {
+        const int less_overloaded_node = find_less_overloaded_node(nodes_array, nodes_count);
+        add_variant_to_array(nodes_array, variant_id, less_overloaded_node);
+        return less_overloaded_node;
     }
 
-    return slave;
+    return node;
 }
 
 void initialize_parameters(Frequency** frequencies, int* freq_count,
@@ -49,9 +49,8 @@ void initialize_parameters(Frequency** frequencies, int* freq_count,
         printf("Failed to tickets CSV\n");
     }
 
-    *slaves_array = create_slaves_array(*comm_size - 2);
-    // TODO: Change name of create_slaves_array, and related functions, to a generic one, since its now used for statistical nodes as well
-    *statistical_array = create_slaves_array(statistical_nodes_amount);
+    *slaves_array = create_nodes_array(*comm_size - 2);
+    *statistical_array = create_nodes_array(statistical_nodes_amount);
 }
 
 void send_structures(Frequency* frequencies, const int freq_count,
@@ -64,7 +63,7 @@ void send_structures(Frequency* frequencies, const int freq_count,
     MPI_Bcast(graph, stops_count, types.stop_graph_type, 0, MPI_COMM_WORLD);
 }
 
-void send_variant_data(const Ticket ticket, const int from_rank, const int rank_to, const MPITypes types) {
+void send_variant_updates(const Ticket ticket, const int from_rank, const int rank_to, const MPITypes types) {
     // If performance is decreased due to 4 sends, we could send the sender and receiver inside the ticket, however that approach would be less clean
     MPI_Send(&ticket, 1, types.ticket_type, from_rank, send_updates, MPI_COMM_WORLD);
     MPI_Send(&rank_to, 1, MPI_INT, from_rank, send_updates, MPI_COMM_WORLD);
@@ -75,11 +74,11 @@ void send_variant_data(const Ticket ticket, const int from_rank, const int rank_
 void process_tickets(const Ticket* tickets, const int tickets_count, array_node* slaves_array, array_node* statistical_array, const int comm_size, const MPITypes types, const int statistical_nodes_amount) {
     for (int i = 0; i < tickets_count; i++) {
         int update = 0;
-        const int slave_rank = get_slave_for_variantId(slaves_array, tickets[i].variant_id, comm_size - 2, &update) + 1;
-        const int statistical_rank = get_slave_for_variantId(statistical_array, tickets[i].variant_id, comm_size - 2, &update) + (comm_size - statistical_nodes_amount);
+        const int slave_rank = get_node_for_variantId(slaves_array, tickets[i].variant_id, comm_size - 2, &update) + 1;
+        const int statistical_rank = get_node_for_variantId(statistical_array, tickets[i].variant_id, comm_size - 2, &update) + (comm_size - statistical_nodes_amount);
 
         if (update == 2) {
-            send_variant_data(tickets[i], slave_rank, statistical_rank, types);
+            send_variant_updates(tickets[i], slave_rank, statistical_rank, types);
             printf("Graph updated for variant %d\n", tickets[i].variant_id);
         }
 

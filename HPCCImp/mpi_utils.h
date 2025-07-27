@@ -26,10 +26,10 @@ enum tag_types {
     shutdown_signal = 3
 };
 
-array_node* create_slaves_array(const int slaves_count);
+array_node* create_nodes_array(const int nodes_count);
 void add_variant_to_array(array_node* slaves_array, const int variant_id, const int rank);
-int find_slave(const array_node* slaves_array, const int variant_id, const int slaves_count, int* update);
-int find_less_overloaded_slave(const array_node* slaves_array, const int slaves_count);
+int find_node(const array_node* nodes_array, const int variant_id, const int nodes_count, int* update);
+int find_less_overloaded_node(const array_node* nodes_array, const int nodes_count);
 void mpi_print(char* message);
 void free_list(variant_list list);
 void free_slaves_array(array_node* slaves_array, const int slaves_count);
