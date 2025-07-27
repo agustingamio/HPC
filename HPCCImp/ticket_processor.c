@@ -54,17 +54,7 @@ int get_stops_to_update(
 }
 
 void process_ticket(const Ticket ticket, StopGraph* graph, const int graph_count, const Frequency* frequencies, const int freq_count) {
-    StopGraph* stop = NULL;
-    for (int i = 0; i < graph_count; i++) {
-        if (graph[i].stop_id == ticket.stop_id &&
-            graph[i].variant_id == ticket.variant_id &&
-            graph[i].day_type == get_day_type_from_date(ticket.sold_date)) {
-            stop = &graph[i];
-            break;
-        }
-    }
-
-
+    StopGraph* stop = get_graph_stop_of_ticket(graph, graph_count, ticket);
     if (stop == NULL) return;
 
     // Comprobar si el ticket ya fue agregado recientemente

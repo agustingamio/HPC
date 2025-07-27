@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "planned_route.h"
+#include "ticket.h"
 
 int create_stop_graph_from_csv(const char* file_path, StopGraph** out_graph, int* out_graph_count) {
     PlannedRouteCsvLine* routes = NULL;
@@ -176,6 +177,70 @@ int get_previous_stops(StopGraph* graph, int graph_size, StopGraph* current, Sto
     return count;
 }
 
+StopGraph* get_next_stop(StopGraph* graph, int graph_size, StopGraph* current) {
+    if (!graph || graph_size <= 0 || !current) {
+        return NULL; // Error: parámetros inválidos
+    }
+
+    for (int i = 0; i < graph_size; i++) {
+        if (graph[i].relative_stop_id == current->relative_stop_id + 1 &&
+            graph[i].variant_id == current->variant_id &&
+            graph[i].day_type == current->day_type) {
+            return &graph[i]; // Encontrado el stop anterior
+            }
+    }
+
+    return NULL; // No se encontró el stop anterior
+}
+
+
+int get_next_stops(StopGraph* graph, int graph_size, StopGraph* current, StopGraph** result_out) {
+    if (!graph || graph_size <= 0 || !current || !result_out) {
+        return -1; // Error: parámetros inválidos
+    }
+
+    int count = 0;
+    for (int i = 0; i < graph_size; i++) {
+        if (graph[i].relative_stop_id >= current->relative_stop_id &&
+            graph[i].variant_id == current->variant_id &&
+            graph[i].day_type == current->day_type) {
+            count++;
+            }
+    }
+
+    if (count == 0){
+        *result_out = NULL;
+        return 0;
+    }
+
+    *result_out = malloc(count*sizeof(StopGraph*));
+    if (*result_out == NULL){
+        return -1;
+    }
+
+    int index = 0;
+    for (int i = 0; i < graph_size; i++){
+        if (graph[i].relative_stop_id >= current->relative_stop_id &&
+            graph[i].variant_id == current->variant_id &&
+            graph[i].day_type == current->day_type){
+            result_out[index++] = &graph[i];
+            }
+    }
+
+    // Sort the result by relative_stop_id ascending
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = i + 1; j < count; j++) {
+            if (result_out[i]->relative_stop_id > result_out[j]->relative_stop_id) {
+                StopGraph* temp = result_out[i];
+                result_out[i] = result_out[j];
+                result_out[j] = temp;
+            }
+        }
+    }
+
+    return count;
+}
+
 int save_stop_graph_to_csv(const char* filepath, const StopGraph* graph, int count) {
     FILE* file = fopen(filepath, "w");
     if (!file) return -1;
@@ -249,7 +314,18 @@ int load_stop_graph_from_csv(const char* filepath, StopGraph** graph_out, int* c
     return 0;
 }
 
+StopGraph* get_graph_stop_of_ticket(StopGraph* graph, const int graph_count, const Ticket ticket) {
+    for (int i = 0; i < graph_count; i++) {
+        if (graph[i].stop_id == ticket.stop_id &&
+            graph[i].variant_id == ticket.variant_id &&
+            graph[i].day_type == get_day_type_from_date(ticket.sold_date)) {
+            return &graph[i];
+            break;
+            }
+    }
 
+    return NULL;
+}
 
 int get_relative_stop_by_stop_id(StopGraph* graph, int graph_size, int stop_id, int variant_id) {
     if (!graph || graph_size <= 0) {

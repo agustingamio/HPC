@@ -3,6 +3,7 @@
 
 #include <time.h>
 #include "day_type.h"
+#include "ticket.h"
 
 #define MAX_TICKETS_PER_STOP 10
 
@@ -25,13 +26,17 @@ void add_ticket_to_stop(StopGraph* stop, struct tm ticket_time);
 
 // Devuelve el stop anterior en la ruta
 StopGraph* get_previous_stop(StopGraph* graph, int graph_size, StopGraph* current);
+StopGraph* get_next_stop(StopGraph* graph, int graph_size, StopGraph* current);
 
 // Devuelve los stops anteriores en la ruta
 int get_previous_stops(StopGraph* graph, int graph_size, StopGraph* current, StopGraph*** result_out);
+int get_next_stops(StopGraph* graph, int graph_size, StopGraph* current, StopGraph** result_out);
 
 int save_stop_graph_to_csv(const char* filepath, const StopGraph* graph, int count);
 
 int load_stop_graph_from_csv(const char* filepath, StopGraph** graph_out, int* count_out);
+
+StopGraph* get_graph_stop_of_ticket(StopGraph* graph, const int graph_count, const Ticket ticket);
 
 // Obtiene el stop relativo por ID de parada y variante
 int get_relative_stop_by_stop_id(StopGraph* graph, int graph_size, int stop_id, int variant_id);
