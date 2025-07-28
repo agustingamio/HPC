@@ -161,6 +161,14 @@ public class StopGraph
         return result;
     }
     
+    public string TextStopGraphLine()
+    {
+        return
+            $"Stop ID: {StopId}, Variant ID: {VariantId}, Day Type: {(int)DayType}, Relative Stop ID: {RelativeStopId}, " +
+            $"Time from Last Stop: {(TimeFromLastStop.HasValue ? (long)TimeFromLastStop.Value.TotalSeconds : 0)} seconds, " +
+            $"Ticket Count: {LastSoldTickets.Count}";
+    }
+    
     public void PrintStopGraphLine()
     {
         Console.WriteLine(

@@ -1,5 +1,6 @@
 using HPCConcept.Helper;
 using Serilog;
+using System.Text;
 
 namespace HPCConcept.Structures;
 
@@ -9,7 +10,7 @@ public class Ticket
     public int StopId { get; set; }
     public int VariantId { get; set; }
     
-    public static int ProcessTicket(Ticket ticket, List<StopGraph> graph, List<Frequency> frequencies, ILogger logger)
+    public static int ProcessTicket(Ticket ticket, List<StopGraph> graph, List<Frequency> frequencies, ILogger logger, StringBuilder outputBuilder)
     {
         try
         {
@@ -19,45 +20,45 @@ public class Ticket
             
 
             if (stop == null) throw new Exception();
-            stop.PrintStopGraphLine();
+            outputBuilder.AppendLine(stop.TextStopGraphLine());
 
             if (!stop.LastSoldTickets.Any(t => Math.Abs((t - ticket.SoldDate).TotalMinutes) < 1))
             {
                 stop.AddLastSoldTicket(ticket.SoldDate);
-                Console.WriteLine("Ticket added to stop");
+                outputBuilder.Append("Ticket added to stop: ");
             }
             else
             {
-                Console.WriteLine("Ticket NOT added to stop");
+                outputBuilder.Append("Ticket NOT added to stop: ");
             }
 
             if (stop.RelativeStopId == 1) return 5;
         
             var previousStops = StopGraph.GetPreviousStops(stop, graph);
-            Console.WriteLine($"Previous stops count: {previousStops.Count}");
+            outputBuilder.AppendLine($"Previous stops count: {previousStops.Count}");
             var estimatedDateTimeOfDeparture = ticket.SoldDate - GetEstimatedTimeBetweenStops(previousStops);
-            Console.WriteLine($"Estimated departure time: {estimatedDateTimeOfDeparture:HH:mm:ss}");
+            outputBuilder.AppendLine($"Estimated departure time: {estimatedDateTimeOfDeparture:HH:mm:ss}");
             
             var range = Frequency.GetFrequencyAverage(frequencies, ticket, estimatedDateTimeOfDeparture);
-            Console.WriteLine($"Frequency range: {range.TotalSeconds} seconds");
+            outputBuilder.AppendLine($"Frequency range: {range.TotalSeconds} seconds");
 
             var stopsToUpdate = GetStopsToUpdate(previousStops, range, ticket);
-            Console.WriteLine($"Stops to update count: {stopsToUpdate.Item1.Count}");
+            outputBuilder.AppendLine($"Stops to update count: {stopsToUpdate.Item1.Count}");
             if (stopsToUpdate.Item2.HasValue)
             {
-                Console.WriteLine($"Ticket found for update");
+                outputBuilder.AppendLine($"Ticket found for update");
             }
             else
             {
-                Console.WriteLine($"No matching ticket found");
+                outputBuilder.AppendLine($"No matching ticket found");
             }
             
             if (stopsToUpdate.Item2 == null) return 6;
             
             var timeFromLastSoldTicket = ticket.SoldDate - stopsToUpdate.Item2;
-            Console.WriteLine($"Time from last sold ticket: {timeFromLastSoldTicket.Value.TotalSeconds} seconds");
+            outputBuilder.AppendLine($"Time from last sold ticket: {timeFromLastSoldTicket.Value.TotalSeconds} seconds");
             var theoreticalTimeFromLastStop = stopsToUpdate.Item1.Skip(1).Sum(stopToSum => stopToSum.TimeFromLastStop.Value.TotalSeconds);
-            Console.WriteLine($"Theoretical time: {theoreticalTimeFromLastStop} seconds");
+            outputBuilder.AppendLine($"Theoretical time: {theoreticalTimeFromLastStop} seconds");
  
             foreach (var stopToUpdate in stopsToUpdate.Item1.Skip(1))
             {
@@ -70,7 +71,7 @@ public class Ticket
                 var timeToAdd = timeFromLastSoldTicket.Value.TotalSeconds * percentage / 100;
                 if (double.IsNaN(timeToAdd))  timeToAdd = 0;
                 stopToUpdate.TimeFromLastStop = TimeSpan.FromSeconds(( stopToUpdate.TimeFromLastStop.Value.TotalSeconds + timeToAdd ) / 2);
-                Console.WriteLine($"Updated time for stop {stopToUpdate.StopId}: {stopToUpdate.TimeFromLastStop.Value.TotalSeconds} seconds");
+                outputBuilder.AppendLine($"Updated time for stop {stopToUpdate.StopId}: {stopToUpdate.TimeFromLastStop.Value.TotalSeconds} seconds");
             }
 
             return 0;
@@ -152,6 +153,11 @@ public class Ticket
     public string ToCsvLine()
     {
         return $"{SoldDate:yyyy-MM-dd HH:mm:ss},{StopId},{VariantId}";
+    }
+    
+    public string TextTicketLine()
+    {
+        return $"Sold Date: {SoldDate:yyyy-MM-dd HH:mm:ss}, Stop ID: {StopId}, Variant ID: {VariantId}";
     }
     
     public void PrintTicketLine()

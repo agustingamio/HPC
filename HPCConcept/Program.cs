@@ -35,13 +35,17 @@ var returnTypes = new int[7] {0, 0, 0, 0, 0, 0, 0};
 foreach (var ticket in tickets)
 {
     count++;
-    Console.Write("Starting proccess of: ");
-    ticket.PrintTicketLine();
-    var result = Ticket.ProcessTicket(ticket, graph, frequencies, Log.Logger);
-    //printf("Ending proccessing... \n");
-    Console.WriteLine($"Ending proccessing...");
-    Console.WriteLine();
+    StringBuilder outputBuilder = new StringBuilder();
+    outputBuilder.AppendLine($"Starting proccess of: {ticket.TextTicketLine()}");
+    var result = Ticket.ProcessTicket(ticket, graph, frequencies, Log.Logger, outputBuilder);
+    outputBuilder.AppendLine("Ending proccessing...");
+    outputBuilder.AppendLine();
     returnTypes[result]++;
+    Console.Write(outputBuilder);
+    if (false)
+    {
+        Console.Write(outputBuilder);
+    }
     
     if (count % 1000 == 0)
     {
