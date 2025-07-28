@@ -12,15 +12,18 @@
 void predict_future_times(const Ticket ticket, int stop_graph_count, StopGraph* graph){
     StopGraph* stop = get_graph_stop_of_ticket(graph, stop_graph_count, ticket);
 
-    StopGraph* next_stops;
+    StopGraph** next_stops;
     int next_stops_count = get_next_stops(graph, stop_graph_count, stop, &next_stops);
 
     // TODO: Check this refactor
     //calcula todos los tiempos estimados para cada parada obtenida en el grafo y las va mostrando en consola
     struct tm estimated_time = ticket.sold_date;
     for (int i = 0; i < next_stops_count; i++) {
-        estimated_time = add_seconds(estimated_time, next_stops[i].time_from_last_stop);
-        next_stops[i].next_arrival_time = estimated_time;
+        estimated_time = add_seconds(estimated_time, next_stops[i]->time_from_last_stop);
+        next_stops[i]->next_arrival_time = estimated_time;
+        if (ticket.variant_id == 0)
+            printf("Estimated time for stop %d: %02d:%02d:%02d\n", next_stops[i]->relative_stop_id,
+                estimated_time.tm_hour, estimated_time.tm_min, estimated_time.tm_sec);
     }
 }
 

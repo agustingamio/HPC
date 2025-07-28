@@ -30,7 +30,7 @@ StopGraph* get_next_stop(StopGraph* graph, int graph_size, StopGraph* current);
 
 // Devuelve los stops anteriores en la ruta
 int get_previous_stops(StopGraph* graph, int graph_size, StopGraph* current, StopGraph*** result_out);
-int get_next_stops(StopGraph* graph, int graph_size, StopGraph* current, StopGraph** result_out);
+int get_next_stops(StopGraph* graph, int graph_size, StopGraph* current, StopGraph*** result_out);
 
 int save_stop_graph_to_csv(const char* filepath, const StopGraph* graph, int count);
 

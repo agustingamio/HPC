@@ -1,6 +1,7 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "../mpi_utils.h"
 #include "../mpi_types.h"
@@ -87,7 +88,7 @@ void process_tickets(const Ticket* tickets, const int tickets_count, array_node*
         printf("Ticket processed for variant %d\n", tickets[i].variant_id);
         fflush(stdout);
 
-        _sleep(40);
+        //sleep(2);
     }
 }
 

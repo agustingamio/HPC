@@ -194,9 +194,9 @@ StopGraph* get_next_stop(StopGraph* graph, int graph_size, StopGraph* current) {
 }
 
 
-int get_next_stops(StopGraph* graph, int graph_size, StopGraph* current, StopGraph** result_out) {
+int get_next_stops(StopGraph* graph, int graph_size, StopGraph* current, StopGraph*** result_out) {
     if (!graph || graph_size <= 0 || !current || !result_out) {
-        return -1; // Error: parámetros inválidos
+        return -1;
     }
 
     int count = 0;
@@ -223,17 +223,17 @@ int get_next_stops(StopGraph* graph, int graph_size, StopGraph* current, StopGra
         if (graph[i].relative_stop_id >= current->relative_stop_id &&
             graph[i].variant_id == current->variant_id &&
             graph[i].day_type == current->day_type){
-            result_out[index++] = &graph[i];
+            (*result_out)[index++] = &graph[i];
             }
     }
 
     // Sort the result by relative_stop_id ascending
     for (int i = 0; i < count - 1; i++) {
         for (int j = i + 1; j < count; j++) {
-            if (result_out[i]->relative_stop_id > result_out[j]->relative_stop_id) {
-                StopGraph* temp = result_out[i];
-                result_out[i] = result_out[j];
-                result_out[j] = temp;
+            if ((*result_out)[i]->relative_stop_id > (*result_out)[j]->relative_stop_id) {
+                StopGraph* temp = (*result_out)[i];
+                (*result_out)[i] = (*result_out)[j];
+                (*result_out)[j] = temp;
             }
         }
     }

@@ -1,5 +1,6 @@
 #include <mpi.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "mpi_types.h"
 #include "master_node/master.h"
@@ -16,7 +17,7 @@ int main(int argc, char** argv) {
 
     int i = 0;
     while (!i)
-        _sleep(5);
+        sleep(5);
 
     MPITypes types;
     create_ticket_type(&types.ticket_type);
