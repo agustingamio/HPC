@@ -139,8 +139,7 @@ void send_graph_updates(StopGraph* graph, const int stops_count,
     MPI_Send(*stops_list, variant_stops_count, types.stop_graph_type, updates_receiver, send_updates, MPI_COMM_WORLD);
 }
 
-void recv_graph_updates(StopGraph* graph, const int stops_count,
-                           const Ticket ticket, const MPITypes types)
+void recv_graph_updates(StopGraph* graph, const int stops_count, const MPITypes types)
 {
     int update_size, update_sender;
     MPI_Recv(&update_sender, 1, MPI_INT, 0, recv_updates, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -154,6 +153,7 @@ void recv_graph_updates(StopGraph* graph, const int stops_count,
                 graph[i].variant_id == updates[j].variant_id &&
                 graph[i].day_type == updates[j].day_type) {
                 graph[i].time_from_last_stop = updates[j].time_from_last_stop;
+                graph[i].next_arrival_time = updates[j].next_arrival_time;
                 break;
                 }
         }

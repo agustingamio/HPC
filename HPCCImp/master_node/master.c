@@ -72,6 +72,16 @@ void send_variant_updates(const Ticket ticket, const int from_rank, const int ra
     MPI_Send(&from_rank, 1, MPI_INT, rank_to, recv_updates, MPI_COMM_WORLD);
 }
 
+void request_checkpoint(const MPITypes types, const array_node* slaves_array, const int slaves_count, const int comm_size) {
+    for (int i = 0; i < slaves_count; i++) {
+        for (int j = 0; j < slaves_array->variants_count; j++) {
+            Ticket ticket;
+            ticket.variant_id = slaves_array->variants[j].variant_id;
+            send_variant_updates(ticket, i + 1, comm_size - 1, types);
+        }
+    }
+}
+
 void process_tickets(const Ticket* tickets, const int tickets_count, array_node* slaves_array, array_node* statistical_array, const int comm_size, const MPITypes types, const int statistical_nodes_amount) {
     for (int i = 0; i < tickets_count; i++) {
         int update = 0;
@@ -81,6 +91,10 @@ void process_tickets(const Ticket* tickets, const int tickets_count, array_node*
         if (update == 2) {
             send_variant_updates(tickets[i], slave_rank, statistical_rank, types);
             printf("Graph updated for variant %d\n", tickets[i].variant_id);
+        }
+
+        if (i % 1000 == 0) {
+            request_checkpoint(types, slaves_array, comm_size - statistical_nodes_amount - 1, comm_size);
         }
 
         MPI_Send(&tickets[i], 1, types.ticket_type, slave_rank, ticket_to_process, MPI_COMM_WORLD);

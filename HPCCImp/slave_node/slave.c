@@ -27,7 +27,7 @@ void message_process(const Frequency* frequencies, const int freq_count,
         } else if (tag == send_updates) {
             send_graph_updates(graph, stops_count, ticket, types);
         } else if (tag == recv_updates) {
-            recv_graph_updates(graph, stops_count, ticket, types);
+            recv_graph_updates(graph, stops_count, types);
         } else if (tag == shutdown_signal) {
             break;
         }

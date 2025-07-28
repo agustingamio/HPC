@@ -22,6 +22,8 @@ add_executable(HPCCConcept main.c planned_route.c frequency.c day_type.c ticket.
         mpi_types.c
         mpi_types.h
         slave_node/slave.c
-        slave_node/slave.h)
+        slave_node/slave.h
+        checkpoints_node/checkpoints.c
+        checkpoints_node/checkpoints.h)
 
 target_link_libraries(HPCCConcept PRIVATE MPI::MPI_C)

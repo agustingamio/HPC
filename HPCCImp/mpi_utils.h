@@ -23,7 +23,8 @@ enum tag_types {
     ticket_to_process = 0,
     send_updates = 1,
     recv_updates = 2,
-    shutdown_signal = 3
+    create_checkpoint = 3,
+    shutdown_signal = 4
 };
 
 array_node* create_nodes_array(const int nodes_count);
@@ -35,6 +36,6 @@ void free_list(variant_list list);
 void free_slaves_array(array_node* slaves_array, const int slaves_count);
 
 void send_graph_updates(StopGraph* graph, const int stops_count, const Ticket ticket, const MPITypes types);
-void recv_graph_updates(StopGraph* graph, const int stops_count, const Ticket ticket, const MPITypes types);
+void recv_graph_updates(StopGraph* graph, const int stops_count, const MPITypes types);
 void receive_structures(Frequency** frequencies, int* freq_count, StopGraph** graph, int* stops_count, const MPITypes types);
 #endif
